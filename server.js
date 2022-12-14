@@ -6,8 +6,14 @@ const dbConnect = require("./Database/database");
 const app = express();
 dbConnect();
 
-app.use(cors());
+// app.use(cors());
 app.use(express.json({ extended: false }));
+
+app.get("/", (req, res) => {
+  res.json({
+    messgae: "Hello backend",
+  });
+});
 
 app.listen(process.env.PORT, (error) => {
   if (error) return error.message;
