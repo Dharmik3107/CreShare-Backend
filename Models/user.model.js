@@ -59,10 +59,10 @@ userSchema.methods.setPassword = function (password) {
 };
 
 userSchema.methods.validPassword = function (password) {
-  const password = crypto
+  const hashedpassword = crypto
     .pbkdf2Sync(password, this.salt, 1000, 64, `sha512`)
     .toString(`hex`);
-  return this.password === password;
+  return this.password === hashedpassword;
 };
 
 const UserModel = mongoose.model("user", userSchema);

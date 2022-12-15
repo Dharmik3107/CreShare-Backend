@@ -1,9 +1,9 @@
-import UserModel from "../Models/user.model";
-import jwt from "jsonwebtoken";
-import { v4 } from "uuid";
-import * as dotenv from "dotenv";
-import crypto from "crypto";
-import { sendEmail } from "../Utilities/Mailer";
+const UserModel = require("../Models/user.model");
+const TokenModel = require("../Models/token.model");
+const jwt = require("jsonwebtoken");
+const { v4 } = require("uuid");
+const dotenv = require("dotenv");
+const { sendEmail } = require("../Utilities/Mailer");
 
 dotenv.config();
 
@@ -130,9 +130,66 @@ const login = async (req, res) => {
           id: user.id,
           email: user.email,
         });
+        const refreshToken = generateToken(
+          {
+            id: user.id,
+            email: user.enai,
+          },
+          process.env.REFRESH_TOKEN_KEY
+        );
+
+        //creating token doc for database
+        const token = new TokenModel({
+          email: user.email,
+          token: refreshToken,
+        });
+
+        //saving the doc in database
+        token.save((error, result) => {
+          if (error)
+            return res.status(500).json({
+              error: true,
+              message: error.message,
+            });
+          return res.status(200).json({
+            message: "Sign in Successfull",
+            accessToken,
+            refreshToken,
+          });
+        });
       }
     );
   } catch (error) {
     console.log(error.message);
   }
 };
+
+//Logout API
+const logout = async (req, res) => {
+  try {
+    await TokenModel.deleteOne(
+      { email: req.body.email, token: req.body.token },
+      (error, result) => {
+        if (error)
+          return res.status(500).json({
+            error: true,
+            message: error.message,
+          });
+        if (!result.deletedCount) {
+          return res.status(404).json({
+            error: true,
+            message: "Invalid Token",
+          });
+        } else {
+          return res.status(200).json({
+            message: "Logged out successfully",
+          });
+        }
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = { register, verify, login, logout };

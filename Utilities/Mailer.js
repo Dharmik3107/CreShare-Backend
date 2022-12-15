@@ -8,16 +8,21 @@ const transport = nodemailer.createTransport({
   },
 });
 
-export const sendEmail = (username, email, data) => {
-  transport.sendMail({
-    from: process.env.EMAIL,
-    to: email,
-    subject: "Please verify Your Account",
-    html: `<h1>Email Confirmation</h1>
+const sendEmail = (username, email, data) => {
+  transport.sendMail(
+    {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Please verify Your Account",
+      html: `<h1>Email Confirmation</h1>
         <h2>Hello ${username}</h2>
         <p>Thank you for registering. Please confirm your email by clicking on the following link</p>
         <a href=https://www.hazguard.tech/verify/${data}> Click here</a>`,
-  },(error)=>{
-    console.log(error.message)
-  });
+    },
+    (error) => {
+      console.log(error.message);
+    }
+  );
 };
+
+module.exports = sendEmail;
